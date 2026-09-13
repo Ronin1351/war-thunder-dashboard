@@ -32,11 +32,13 @@ This deliverable is prepared for Vercel, but has not been deployed to your accou
 - Infantry filters cover weapon category and chambering. Details include cartridges, magazines and all available weapon fields.
 - Each section supports search, category shortcuts, sorting, pagination and an advanced specification filter.
 - Use the sun or moon button to switch light and dark modes. The preference is stored in the browser.
+- Ground search uses vehicle names and vehicle IDs. Internal gun identifiers do not create unrelated matches.
 
 ## Data semantics
 
 - Air data includes 432 guided weapons, 2,281 carrier links and 3,044 launch-envelope records.
 - Ground data includes 1,237 vehicles, 2,642 vehicle-gun links, 9,485 vehicle-ammunition links and 1,201 recommended loadouts.
+- Light, medium, heavy, tank-destroyer, SPAA and ATGM roles come from the official War Thunder Wiki role collections. Vehicles missing from the collections remain marked as unclassified within their workbook class.
 - Infantry data includes 81 weapons, 97 cartridges, 11 grenades, 147 weapon-cartridge links and 93 weapon-magazine links.
 - `File` is the stable weapon identifier. Variants remain separate entries, even when display names match.
 - Origin comes from the weapon filename prefix. Carrier country is the aircraft's nation. The interface displays the source labels `Usa` and `Ussr` as USA and USSR in the country selector.
@@ -57,6 +59,7 @@ Re-import updated workbooks with the same schemas:
 python -m pip install openpyxl
 python scripts/import_workbook.py "C:\path\war_thunder_guided_weapons.xlsx"
 python scripts/import_all.py "C:\path\war_thunder_ground_vehicles.xlsx" "C:\path\war_thunder_infantry_weapons.xlsx"
+python scripts/import_ground_roles.py
 npm run build
 ```
 
@@ -76,11 +79,11 @@ Tests cover source counts and joins, same-carrier filtering, missing BR, median 
 ## Files
 
 - `index.html`, `styles.css`, `app.js`: interface and interactions.
-- `data/weapons.json`, `data/ground.json`, `data/infantry.json`: source datasets. The build embeds all three into `dist/app.js`.
+- `data/weapons.json`, `data/ground.json`, `data/ground_roles.json`, `data/infantry.json`: source datasets. The build embeds them into `dist/app.js`.
 - `server.js`: dependency-free local preview server.
 - `build.js`: builds the static `dist` folder.
 - `vercel.json`: deployment settings.
-- `scripts/import_workbook.py`, `scripts/import_all.py`: repeatable workbook conversion.
+- `scripts/import_workbook.py`, `scripts/import_all.py`, `scripts/import_ground_roles.py`: repeatable data imports.
 - `tests/filters.test.js`: semantic checks.
 
 © 2025 Kevin Shokrollahi – All Rights Reserved
