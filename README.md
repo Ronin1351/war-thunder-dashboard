@@ -75,7 +75,7 @@ Tests cover source counts and joins, same-carrier filtering, missing BR, median 
 
 - `index.html`, `styles.css`, `app.js`: interface and interactions.
 - `logic.js`: filtering and BR summaries.
-- `data/weapons.json`: complete dataset.
+- `data/weapons.json`: complete source dataset. The build embeds it into `dist/app.js`, so the deployed app does not make a separate JSON request.
 - `server.js`: dependency-free local preview server.
 - `build.js`: builds the static `dist` folder.
 - `vercel.json`: deployment settings.
