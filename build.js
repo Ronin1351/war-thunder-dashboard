@@ -1,6 +1,6 @@
 import { mkdir, copyFile, readFile, writeFile, rm } from 'node:fs/promises';
 await rm('dist',{recursive:true,force:true});await mkdir('dist');
-for(const file of ['index.html','styles.css'])await copyFile(file,`dist/${file}`);
+for(const file of ['index.html','styles.css','search.js'])await copyFile(file,`dist/${file}`);
 const [air,ground,groundRoles,infantry,app]=await Promise.all([
   readFile('data/weapons.json','utf8'),
   readFile('data/ground.json','utf8'),

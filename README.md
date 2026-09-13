@@ -31,6 +31,7 @@ This deliverable is prepared for Vercel, but has not been deployed to your accou
 - Ground filters cover nation, class, rank, game mode and BR. Vehicle details include recommended loadouts, guns and available ammunition.
 - Infantry filters cover weapon category and chambering. Details include cartridges, magazines and all available weapon fields.
 - Each section supports search, category shortcuts, sorting, pagination and an advanced specification filter.
+- Search uses visible names and clean IDs. It ignores internal file extensions and hidden relationship IDs, then ranks exact and prefix matches first.
 - Use the sun or moon button to switch light and dark modes. The preference is stored in the browser.
 - Ground search uses vehicle names and vehicle IDs. Internal gun identifiers do not create unrelated matches.
 
