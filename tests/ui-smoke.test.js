@@ -22,7 +22,7 @@ class MockElement {
 function loadJson(name){return JSON.parse(fs.readFileSync(new URL(`../data/${name}`,import.meta.url),'utf8'));}
 
 function createContext(){
-  const ids=['searchInput','nationFilter','secondaryFilter','categoryFilter','typeFilter','modeFilter','minBr','maxBr','fieldFilter','operatorFilter','valueFilter','valueLabel','sortFilter','stats','quickFilters','activeFilters','tableHead','tableBody','armourLegend','emptyState','resultCount','pageStatus','previousPage','nextPage','pageTitle','pageSubtitle','breadcrumb','directoryTitle','filterTitle','dataNote','nationLabel','secondaryLabel','categoryLabel','typeLabel','brFilters','detailTitle','detailEyebrow','detailBody','detailDialog','sourcesBody','sourcesDialog','settingsDialog','settingsButton','sourcesButton','themeButton','mobileFilters','closeDetail','closeSources','closeSettings','cancelSettings','settingsDomain','settingsTheme','settingsMessage','settingsFieldList','fieldCount','resetDirectoryFields','saveSettings','resetButton','emptyReset','armourPlatesContent','armourPlatesLabel','errorState','loadoutFinderButton','loadoutFinderDialog','closeLoadoutFinder','finderDomain','finderSearch','finderNation','finderMode','finderMinBr','finderMaxBr','finderFireLabel','finderFireOnly','finderCount','finderNotice','finderHead','finderBody','exportBackup','importBackup','backupFile','backupMessage','finderRoleLabel','finderRole','finderFoxLabel','finderFox','finderMinQuantity','finderViewLabel','finderView','finderStockLabel','finderStockOnly','finderPenLabel','finderMinPen','finderExportJson','finderExportCsv','homeNav','sideFinder','sideSettings','homeAircraft','homeGround','homeEquipment','homeSearchForm','homeSearch','homeView','workspaceView','finderTitle','finderEyebrow','finderHelp'];
+  const ids=['searchInput','nationFilter','secondaryFilter','categoryFilter','typeFilter','modeFilter','minBr','maxBr','fieldFilter','operatorFilter','valueFilter','valueLabel','sortFilter','stats','quickFilters','activeFilters','tableHead','tableBody','armourLegend','emptyState','resultCount','pageStatus','previousPage','nextPage','pageTitle','pageSubtitle','breadcrumb','directoryTitle','filterTitle','dataNote','nationLabel','secondaryLabel','categoryLabel','typeLabel','brFilters','detailTitle','detailEyebrow','detailBody','detailDialog','sourcesBody','sourcesDialog','settingsDialog','settingsButton','sourcesButton','themeButton','mobileFilters','closeDetail','closeSources','closeSettings','cancelSettings','settingsDomain','settingsTheme','settingsMessage','settingsFieldList','fieldCount','resetDirectoryFields','saveSettings','resetButton','emptyReset','armourPlatesContent','armourPlatesLabel','errorState'];
   const elements=Object.fromEntries(ids.map(id=>[id,new MockElement(id)]));
   elements.modeFilter.value='BR Realistic';
   elements.operatorFilter.value='contains';
@@ -36,7 +36,7 @@ function createContext(){
     querySelector:selector=>selector==='.domain-nav'?nav:null,
     querySelectorAll:selector=>selector==='[data-domain]'?domainButtons:[]
   };
-  const files={'data/weapons.json':'weapons.json','data/aircraft.json':'aircraft.json','data/aircraft_loadouts.json':'aircraft_loadouts.json','data/ground.json':'ground.json','data/ground_roles.json':'ground_roles.json','data/infantry.json':'infantry.json','data/armour.json':'armour.json','data/sensors.json':'sensors.json'};
+  const files={'data/weapons.json':'weapons.json','data/aircraft.json':'aircraft.json','data/ground.json':'ground.json','data/ground_roles.json':'ground_roles.json','data/infantry.json':'infantry.json','data/armour.json':'armour.json','data/sensors.json':'sensors.json'};
   const fetched=[];
   const fetchMock=async url=>{fetched.push(url);const name=files[url];return{ok:true,json:async()=>name?loadJson(name):[]};};
   const context={console,document,localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)},Intl,Map,Set,Promise,JSON,Math,Number,String,Object,Array,RegExp,Error,encodeURIComponent,setTimeout,clearTimeout,fetch:fetchMock};
@@ -46,25 +46,9 @@ function createContext(){
 
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 
-test('Search-first home keeps every directory accessible',async()=>{
-  const {context,elements}=createContext();
-  vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),context);
-  vm.runInContext(fs.readFileSync(new URL('../recommendation.js',import.meta.url),'utf8'),context);
-  vm.runInContext(fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
-  await settle();await settle();
-  assert.equal(elements.homeView.hidden,false);
-  assert.equal(elements.workspaceView.hidden,true);
-  await elements.homeEquipment.onclick();
-  assert.equal(elements.homeView.hidden,true);
-  assert.equal(elements.workspaceView.hidden,false);
-  elements.homeNav.onclick();
-  assert.equal(elements.homeView.hidden,false);
-});
-
 test('Only the datasets a directory needs are fetched',async()=>{
   const {context,elements,nav,domainButtons,fetched}=createContext();
   vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),context);
-  vm.runInContext(fs.readFileSync(new URL('../recommendation.js',import.meta.url),'utf8'),context);
   vm.runInContext(fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
   await settle();await settle();
   assert.deepEqual(fetched.sort(),['data/sensors.json','data/weapons.json']);
@@ -79,7 +63,6 @@ test('Only the datasets a directory needs are fetched',async()=>{
 test('Aircraft directory lists the full roster including gun-only aircraft',async()=>{
   const {context,elements,nav,domainButtons,loadJson}=createContext();
   vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),context);
-  vm.runInContext(fs.readFileSync(new URL('../recommendation.js',import.meta.url),'utf8'),context);
   vm.runInContext(fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
   await settle();await settle();
   const aircraftButton=domainButtons.find(button=>button.dataset.domain==='aircraft');
@@ -104,7 +87,6 @@ test('Aircraft directory lists the full roster including gun-only aircraft',asyn
 test('Built UI initializes, switches to ground, and exposes settings and armor data',async()=>{
   const {context,elements,nav,domainButtons,loadJson}=createContext();
   vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),context);
-  vm.runInContext(fs.readFileSync(new URL('../recommendation.js',import.meta.url),'utf8'),context);
   vm.runInContext(fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
   await settle();await settle();
   assert.match(elements.tableHead.innerHTML,/Sensor-equipped carriers/);
@@ -137,35 +119,4 @@ test('Built UI initializes, switches to ground, and exposes settings and armor d
   assert.match(elements.detailBody.innerHTML,/Armor overview/);
   assert.match(elements.detailBody.innerHTML,/Armor faces and weak spots/);
   assert.match(elements.detailBody.innerHTML,/Sensors/);
-});
-
-test('Loadout Finder lazy-loads aircraft presets and supports ground recommendations',async()=>{
-  const {context,elements,fetched}=createContext();
-  vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),context);
-  vm.runInContext(fs.readFileSync(new URL('../recommendation.js',import.meta.url),'utf8'),context);
-  vm.runInContext(fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
-  await settle();await settle();
-  await elements.loadoutFinderButton.onclick();
-  await new Promise(resolve=>setTimeout(resolve,500));
-  assert.equal(elements.loadoutFinderDialog.open,true);
-  assert.ok(fetched.includes('data/aircraft_loadouts.json'));
-  const finderState=vm.runInContext("JSON.stringify({loading:finderLoading,loaded:!!database.aircraftLoadouts,rows:finderRows.length})",context);
-  assert.match(elements.finderHead.innerHTML,/Quantity/,`${elements.finderNotice.textContent} ${finderState}`);
-  assert.match(elements.finderHead.innerHTML,/Best preset/i);
-  assert.match(elements.finderBody.innerHTML,/incendiary bomb/i);
-  assert.ok(Number.parseInt(elements.finderCount.textContent)>300);
-  elements.finderFireOnly.checked=false;
-  elements.finderSearch.value='ARH';
-  elements.finderSearch.listeners.input();
-  assert.match(elements.finderBody.innerHTML,/Fox 3/);
-  elements.finderSearch.value='AIM-120 + AIM-9';
-  elements.finderSearch.listeners.input();
-  assert.ok(Number.parseInt(elements.finderCount.textContent)>0,'combined search must find same-preset matches');
-  assert.match(elements.finderNotice.textContent,/all \+ separated requests/);
-  elements.finderDomain.value='ground';
-  await elements.finderDomain.onchange();
-  assert.ok(fetched.includes('data/ground.json'));
-  assert.match(elements.finderHead.innerHTML,/Maximum capacity/);
-  assert.match(elements.finderHead.innerHTML,/Recommended/);
-  assert.match(elements.finderBody.innerHTML,/data-ground-override/);
 });
