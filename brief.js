@@ -2,6 +2,11 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const countryName = value => value === 'Usa' ? 'USA' : value === 'Ussr' ? 'USSR' : value;
 const fmt = value => value == null || value === '' ? '—' : typeof value === 'number' ? value.toLocaleString('en-US',{maximumFractionDigits:3}) : String(countryName(value));
+// Regional-indicator flags. The USSR has no flag emoji - no Unicode sequence
+// encodes it - so it falls back to a text badge rather than borrowing the
+// modern Russian flag, which would be the wrong country.
+const NATION_FLAG = {Usa:'\u{1F1FA}\u{1F1F8}',Germany:'\u{1F1E9}\u{1F1EA}',Britain:'\u{1F1EC}\u{1F1E7}',Japan:'\u{1F1EF}\u{1F1F5}',China:'\u{1F1E8}\u{1F1F3}',Italy:'\u{1F1EE}\u{1F1F9}',France:'\u{1F1EB}\u{1F1F7}',Sweden:'\u{1F1F8}\u{1F1EA}',Israel:'\u{1F1EE}\u{1F1F1}'};
+const flag = nation => NATION_FLAG[nation] ? `<span class="nation-flag" role="img" aria-label="${esc(countryName(nation))}">${NATION_FLAG[nation]}</span>` : `<span class="nation-flag nation-text" aria-label="${esc(countryName(nation))}">${esc(String(nation||'').slice(0,4).toUpperCase())}</span>`;
 const pretty = value => String(countryName(value) ?? '').replace(/^exp_/,'').replaceAll('_',' ').replace(/\b\w/g,char=>char.toUpperCase()).replace('Spaa','SPAA');
 
 const sources = {ground:'data/ground.json',armour:'data/armour.json',aircraft:'data/aircraft.json',sensors:'data/sensors.json'};
@@ -33,7 +38,7 @@ function buildIndex(){
     if(!index.has(key))index.set(key,entry);
     index.set(`${key}|${entry.id.toLowerCase()}`,entry);
   }
-  $('pickerList').innerHTML = entries.map(entry=>`<option value="${esc(entry.label)}">${esc(entry.klass)} · BR ${fmt(entry.br)}</option>`).join('');
+  $('pickerList').innerHTML = entries.map(entry=>`<option value="${esc(entry.label)}">${esc(pretty(entry.nation))} · ${esc(entry.klass)} · BR ${fmt(entry.br)} · ${esc(entry.id)}</option>`).join('');
 }
 
 // ------------------------------------------------------------- components
@@ -82,7 +87,7 @@ function header(entry,extra){
   return `<section class="brief-header">
     <div>
       <p class="eyebrow">${esc(entry.kind==='ground'?'GROUND FORCES':'AIR')}</p>
-      <h2>${esc(entry.label)}</h2>
+      <h2>${flag(entry.nation)}${esc(entry.label)}</h2>
       <p class="brief-meta">${esc(pretty(entry.nation))} · ${esc(entry.klass)} · <span class="accent-value">BR ${fmt(entry.br)}</span> · <code>${esc(entry.id)}</code></p>
     </div>
     <div class="brief-header-stats">${extra}</div>
@@ -241,7 +246,10 @@ function suggest(query){
   if(!phrase){$('pickerSuggestions').innerHTML='';return;}
   const hits = entries.filter(entry=>entry.label.toLowerCase().includes(phrase)||entry.id.toLowerCase().includes(phrase)).slice(0,8);
   $('pickerSuggestions').innerHTML = hits.map(entry=>
-    `<button data-pick="${esc(entry.id)}" data-kind="${esc(entry.kind)}"><strong>${esc(entry.label)}</strong><small>${esc(entry.klass)} · BR ${fmt(entry.br)}</small></button>`).join('');
+    `<button data-pick="${esc(entry.id)}" data-kind="${esc(entry.kind)}">
+       <span class="pick-name">${flag(entry.nation)}<strong>${esc(entry.label)}</strong></span>
+       <small>${esc(pretty(entry.nation))} · ${esc(entry.klass)} · BR ${fmt(entry.br)} · <code>${esc(entry.id)}</code></small>
+     </button>`).join('');
 }
 
 $('pickerInput').addEventListener('input',event=>{

@@ -99,3 +99,24 @@ test('A gun-only aircraft still produces a full brief',async()=>{
   assert.match(elements.briefBody.innerHTML,/How it flies/);
   assert.match(elements.briefBody.innerHTML,/Burst mass/);
 });
+
+
+test('Display names carry no in-game icon codepoints',()=>{
+  const icons=/[\u0000-\u001f\u2400-\u25ff\ue000-\uf8ff]/;
+  const ground=loadJson('ground.json').vehicles.filter(row=>icons.test(String(row.Vehicle??'')));
+  const aircraft=loadJson('aircraft.json').aircraft.filter(row=>icons.test(String(row.Aircraft??'')));
+  assert.equal(ground.length,0,`${ground.length} vehicle names still carry Gaijin icon codepoints`);
+  assert.equal(aircraft.length,0,`${aircraft.length} aircraft names still carry Gaijin icon codepoints`);
+});
+
+test('Every nation resolves to a flag or a readable text badge',async()=>{
+  const {elements}=await boot();
+  const nations=new Set([...loadJson('ground.json').vehicles.map(row=>row.Nation),...loadJson('aircraft.json').aircraft.map(row=>row.Nation)].filter(Boolean));
+  assert.ok(nations.size>=10,'expected at least ten nations');
+  elements.pickerInput.listeners.input({target:{value:'M24'}});
+  const markup=elements.pickerSuggestions.innerHTML;
+  assert.match(markup,/nation-flag/);
+  assert.match(markup,/<code>[a-z_0-9]+<\/code>/,'the vehicle id must disambiguate same-named entries');
+  const labels=[...markup.matchAll(/aria-label="([^"]+)"/g)].map(match=>match[1]);
+  assert.ok(labels.length>0,'flags must carry an accessible nation label');
+});

@@ -5,6 +5,7 @@ JSON document per dataset with meta, the sheets it needs, a field dictionary
 and the READ ME rows.
 """
 import json
+import re
 import pathlib
 import sys
 
@@ -23,14 +24,32 @@ SHEETS = {
 }
 
 
+
+# Gaijin embeds in-game nation-icon codepoints in the unit names it ships in
+# units.csv (U+2417, U+2584, private-use U+F059 and friends). 145 ground
+# vehicles and 305 aircraft carry one. Strip them once, at import, so search,
+# sort and every display path see the same clean string.
+ICON_CODEPOINTS = re.compile(r"[\u0000-\u001f\u2400-\u25ff\ue000-\uf8ff]")
+NAME_FIELDS = ("Vehicle", "Aircraft", "Weapon", "Main Plate Part", "Weakest Spot Part")
+
+
+def clean_names(rows):
+    for row in rows:
+        for field in NAME_FIELDS:
+            value = row.get(field)
+            if isinstance(value, str) and ICON_CODEPOINTS.search(value):
+                row[field] = ICON_CODEPOINTS.sub("", value).strip() or value
+    return rows
+
+
 def sheet_rows(workbook, sheet_name):
     values = list(workbook[sheet_name].values)
     headers = values[0]
-    return [
+    return clean_names([
         dict(zip(headers, row))
         for row in values[1:]
         if any(value is not None for value in row)
-    ]
+    ])
 
 
 def notes(workbook):
