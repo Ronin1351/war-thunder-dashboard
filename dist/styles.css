@@ -6,3 +6,39 @@
 .brand-sub{display:flex;align-items:center;gap:9px;font-size:1rem;color:#f4f1e8;font-weight:900;padding:8px 14px;margin-left:8px;border:0;border-radius:11px;letter-spacing:0;background:linear-gradient(145deg,#202a32,#111920);box-shadow:4px 4px 9px var(--shadow-dark),-4px -4px 9px var(--shadow-light),inset 0 1px 0 #ffffff18;text-shadow:0 2px 1px #000,0 0 8px #f5a62338}.iran-lockup{display:flex;align-items:center;gap:3px}.iran-name{font-size:1.18rem;letter-spacing:.035em;white-space:nowrap}.warriors-name{padding-left:10px;border-left:2px solid #d8d2c6;font-size:1.02rem;white-space:nowrap}.iran-wing{width:42px;height:25px;fill:currentColor;filter:drop-shadow(0 2px 1px #000)}.iran-wing-right{transform:scaleX(-1)}
 .nav-icon{width:25px;height:25px;flex:0 0 25px;color:var(--accent-2);fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 3px 3px color-mix(in srgb,var(--accent-2) 30%,transparent))}
 @media(max-width:1050px){.brand-sub{display:none}}
+
+.armour-legend{display:flex;flex-wrap:wrap;gap:8px;padding:0 24px 17px;border-bottom:1px solid var(--line)}
+.armour-rating{display:inline-flex;align-items:center;gap:6px;min-height:25px;padding:4px 8px;border:2px solid transparent;border-radius:8px;font-size:.7rem;font-weight:800;line-height:1.15;white-space:nowrap}
+.armour-rating::before{display:grid;place-items:center;min-width:17px;height:17px;border-radius:4px;background:#0004;color:inherit;font-size:.58rem;font-weight:900;content:attr(data-code)}
+.rating-paper{background:#ff2945;border-color:#ff8393;color:#fff}
+.rating-weak{background:#f47c00;border-color:#ffb04d;color:#111}
+.rating-contested{background:#ffd43b;border-color:#8a6d00;color:#171300}
+.rating-may-strong{background:#159447;border-color:#6fe09a;color:#fff}
+.rating-layered{background:#2477e8;border-color:#77adff;color:#fff}
+.rating-variable{background:#8e55d7;border-color:#c59cff;color:#fff}
+.rating-unknown{background:#65717d;border-color:#aeb7c0;color:#fff}
+.armour-note{margin:13px 0 0;color:var(--muted);font-size:.75rem;line-height:1.55}
+.loading-copy{color:var(--muted);padding:8px 0}
+
+#settingsDialog{width:min(760px,94vw)}
+#settingsBody{padding:25px}
+.settings-section{padding:20px;border-radius:16px;background:var(--surface);box-shadow:6px 6px 14px var(--shadow-dark),-6px -6px 14px var(--shadow-light);margin-bottom:20px}
+.settings-section h3{margin:0 0 15px}
+.settings-section>label{max-width:330px}
+.settings-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.settings-heading h3{margin-bottom:6px}
+.settings-heading p{margin:0;color:var(--muted);font-size:.8rem;line-height:1.45}
+.settings-heading strong{color:var(--accent-2);white-space:nowrap}
+.settings-field-list{display:grid;gap:9px}
+.settings-field{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.settings-field label{display:flex;align-items:center;gap:10px;margin:0;color:var(--text)}
+.settings-field input{width:19px;min-height:19px;margin:0;box-shadow:none;accent-color:var(--accent)}
+.field-order{display:flex;gap:6px}
+.field-order button{width:31px;height:31px;border-radius:8px;background:var(--surface);box-shadow:3px 3px 6px var(--shadow-dark),-3px -3px 6px var(--shadow-light)}
+.field-order button:disabled{opacity:.3}
+.settings-message{min-height:20px;margin:12px 0 0;color:#ff6b78;font-size:.8rem}
+.settings-actions{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.settings-actions>div{display:flex;gap:10px}
+.primary-button{padding:11px 17px;border-radius:12px;background:var(--accent);color:var(--bg);font-weight:800;box-shadow:5px 5px 10px var(--shadow-dark)}
+
+@media(max-width:720px){.soft-button:not(.settings-button){display:none}.settings-button{display:inline-flex;padding:10px 12px}.top-actions{gap:7px}.armour-legend{padding:0 16px 14px}.settings-actions{align-items:stretch;flex-direction:column}.settings-actions>div{display:grid;grid-template-columns:1fr 1fr}.settings-actions button{width:100%}.settings-heading{flex-direction:column;gap:8px}}
