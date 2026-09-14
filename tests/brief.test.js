@@ -120,3 +120,19 @@ test('Every nation resolves to a flag or a readable text badge',async()=>{
   const labels=[...markup.matchAll(/aria-label="([^"]+)"/g)].map(match=>match[1]);
   assert.ok(labels.length>0,'flags must carry an accessible nation label');
 });
+
+
+test('The link between the directory and the Brief survives on a phone',()=>{
+  const css=fs.readFileSync(new URL('../styles.css',import.meta.url),'utf8');
+  const index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const brief=fs.readFileSync(new URL('../brief.html',import.meta.url),'utf8');
+
+  // Both navigation links must carry the class that is exempt from the
+  // mobile hide rule, otherwise the Brief is unreachable on any phone.
+  assert.match(index,/class="soft-button brief-button"[^>]*href="\/"/, 'directory must link to the Brief with brief-button');
+  assert.match(brief,/class="soft-button brief-button"/, 'Brief must link back with brief-button');
+
+  // Every rule that hides .soft-button below 720px must exempt it.
+  for(const rule of css.match(/\.soft-button[^{]*\{display:none\}/g)||[])
+    assert.ok(rule.includes(':not(.brief-button)'),`mobile rule hides the Brief link: ${rule}`);
+});
