@@ -18,6 +18,25 @@ let current = null;
 
 const FACES = ['Front','Side','Rear','Roof','Floor'];
 
+// Every penetration figure carries where it came from. Showing the number
+// without the provenance is how a 1,713 mm guess once outranked a measured 335.
+const PEN_TIERS = [
+  ['Exact',    'pen-exact',    'Exact',      'Read straight from the game files. No estimation involved.'],
+  ['Computed', 'pen-computed', 'Calibrated', 'Computed from the penetration coefficients in the game files, using a constant calibrated against 10 in-game stat-card readings from 20 mm to 152 mm. Worst observed error 2.6%, eight of ten inside 0.6%.'],
+  ['Estimated','pen-estimated','Estimated',  'Computed from the game files but the scale factor for this projectile type has not been calibrated against in-game values. Use the ordering, not the millimetres.'],
+  ['UNKNOWN',  'pen-unknown',  'No data',    'War Thunder computes this at runtime and the figure is not in the game files, or the computed value failed a plausibility check. No number has been invented.']
+];
+function penTier(confidence){
+  const text = String(confidence || '');
+  return PEN_TIERS.find(([prefix]) => text.startsWith(prefix)) || PEN_TIERS[3];
+}
+function penValue(mm, confidence, id){
+  const [, className, label, explain] = penTier(confidence);
+  notes.set(`pen-${id}`, [`Penetration: ${label.toLowerCase()}`, explain]);
+  const shown = mm == null ? '\u2014' : `${fmt(mm)} mm`;
+  return `<button class="pen-chip ${className}" data-note="pen-${id}">${shown}<span>${esc(label)}</span></button>`;
+}
+
 // ---------------------------------------------------------------- loading
 async function load(name){
   if(data[name])return data[name];
@@ -136,6 +155,7 @@ function groundBrief(entry){
             <span class="badge">${esc(row['Ammo Family'])}</span>
             ${row['Stock Ammo']==='Yes'?'<span class="badge">Stock</span>':''}
             <small>${esc(row.Why||'')}</small>
+            <div class="pen-line">${penValue(row['Best Pen (mm)'], row['Pen Confidence'], `${block.key}-${row.Ammunition}`)}</div>
           </div>
           <div class="load-bar"><i style="width:${share}%"></i><span>${share}%</span></div>
         </div>`;}).join('')}</div>`).join('');
@@ -149,7 +169,7 @@ function groundBrief(entry){
           <div class="alt-row">
             <strong>${esc(row.Ammunition)}</strong>
             <span class="badge">${esc(row['Ammo Family'])}</span>
-            <small>${row['Best Pen (mm)']!=null?`${fmt(row['Best Pen (mm)'])} mm · `:''}${esc(String(row['Pen Confidence']||'').split(' - ')[0])}</small>
+            <small>${penValue(row['Best Pen (mm)'], row['Pen Confidence'], `alt-${row.Ammunition}`)}</small>
           </div>`).join('')}</div>
         <p class="brief-caution">These are on the gun but did not earn a slot. ${gap('alts','Why they matter',
           'Nothing is hidden','An earlier version only surfaced a backup round when the primary had no explosive filler, which hid alternatives entirely. Every anti-tank round the vehicle can load is now listed, with the confidence behind its penetration figure.')}</p>`;
