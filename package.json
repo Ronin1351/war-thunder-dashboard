@@ -1,1 +1,1 @@
-{"name":"war-thunder-ordnance-dashboard","version":"2.5.0","private":true,"type":"module","scripts":{"dev":"npm run build && node server.js","start":"node server.js","build":"node build.js","test":"node --test tests/*.test.js"},"engines":{"node":">=20"}}
+{"name":"war-thunder-ordnance-dashboard","version":"3.1.0","private":true,"type":"module","scripts":{"dev":"npm run build && node server.js","start":"node server.js","build":"node build.js","test":"node --test tests/*.test.js"},"engines":{"node":">=20"}}

@@ -11,6 +11,14 @@
   ];
   function baselineTotal(guide){
     const full=Number(guide?.['Full Ammo Capacity']);if(!Number.isFinite(full)||full<=0)return null;
+    // The dataset now carries a vetted total with its own basis and source
+    // (official rack guidance, belt rules, or a conservative baseline). Trust
+    // it when present rather than recomputing and disagreeing with the split.
+    const dataTotal=Number(guide['Recommended Total']);
+    if(Number.isFinite(dataTotal)&&dataTotal>0&&guide['Total Basis'])
+      return{total:Math.min(full,dataTotal),basis:guide['Total Basis'],
+             source:guide['Total Source']||'Datamine capacity',
+             confidence:String(guide['Total Basis']).startsWith('Official')?'Vehicle-specific':'Calculated baseline'};
     const id=String(guide['Vehicle ID']||'');const official=officialRules.find(rule=>rule.match.test(id));
     if(official)return{total:Math.min(full,official.total),basis:official.label,source:official.source,confidence:'Vehicle-specific'};
     const caliber=Number(guide['Main Gun Caliber (mm)']);const unit=String(guide['Unit Class']||'');const protectedRounds=Number(guide['Protected Rack Rounds']);

@@ -1,6 +1,6 @@
-# Ordnance — Iran Squadron database v2.2.0
+# Ordnance — Iran Squadron database v3.0.0
 
-A responsive air, ground and infantry dashboard built from the supplied War Thunder data workbooks. Version 2.2.0 adds ground armor, air and ground sensors, and configurable Directory columns.
+A responsive air, ground and infantry dashboard built from the supplied War Thunder data workbooks. Version 3.0.0 introduces a search-first workspace, persistent side navigation, redesigned aircraft and ground entry points, aircraft-centered results, and clearer loadout guidance while retaining every v2.5 directory, filter and dataset.
 
 ## Run on Windows
 
@@ -37,6 +37,10 @@ This deliverable is prepared for Vercel, but has not been deployed to your accou
 - Open Settings to select and reorder up to 10 Directory fields independently for Air, Ground and Infantry. The name field remains required. Preferences are stored in the browser.
 - Use Settings or the sun and moon button to switch light and dark modes. The preference is stored in the browser.
 - Ground search uses vehicle names and vehicle IDs. Internal gun identifiers do not create unrelated matches.
+- Open Loadout Finder to search aircraft by ordnance name, nation, game mode and BR range. Results show the largest quantity carried in one valid preset; the fire/incendiary switch finds every matching fire-bomb loadout.
+- The Ground tab of Loadout Finder searches main-gun ammunition. It separates verified full vehicle capacity from the recommended quantity for each shell.
+- Ground recommendations use documented vehicle-specific rack guidance where available and a conservative calculated baseline elsewhere. They are starting points, not guaranteed optimal gameplay loadouts.
+- Edit any ground recommended quantity after in-game testing. Local overrides stay in the current browser. Settings can export them and all display preferences to JSON or restore that backup later.
 
 ## Data semantics
 
@@ -69,6 +73,7 @@ python scripts/import_workbook.py "C:\path\war_thunder_guided_weapons.xlsx"
 python scripts/import_all.py "C:\path\war_thunder_ground_vehicles.xlsx" "C:\path\war_thunder_infantry_weapons.xlsx"
 python scripts/import_additional.py "C:\path\war_thunder_ground_armour.xlsx" "C:\path\war_thunder_sensors.xlsx"
 python scripts/import_ground_roles.py
+python scripts/import_aircraft_loadouts.py "C:\path\war_thunder_aircraft_secondary_weapons.xlsx"
 npm run build
 ```
 
@@ -81,19 +86,19 @@ npm test
 npm run build
 ```
 
-The build validates and embeds the Directory datasets plus armor and sensor summaries. Armor plate files are copied separately and loaded only when a Ground detail page opens.
+The build validates and copies the datasets as separate static files. Aircraft loadouts and armor plates are loaded only when requested, keeping the initial page lightweight.
 
 Tests cover source counts and joins, same-carrier filtering, missing BR, median calculation, numeric zero versus missing data, armor coverage, sensor integrity, expected platform matches and the primary UI flows.
 
 ## Files
 
 - `index.html`, `styles.css`, `app.js`: interface and interactions.
-- `data/weapons.json`, `data/ground.json`, `data/ground_roles.json`, `data/infantry.json`, `data/armour.json`, `data/sensors.json`: source datasets embedded into `dist/app.js`.
+- `data/weapons.json`, `data/aircraft.json`, `data/aircraft_loadouts.json`, `data/ground.json`, `data/ground_roles.json`, `data/infantry.json`, `data/armour.json`, `data/sensors.json`: static datasets fetched on demand.
 - `data/armour_plates/`: per-vehicle plate details loaded on demand.
 - `server.js`: dependency-free local preview server.
 - `build.js`: builds the static `dist` folder.
 - `vercel.json`: deployment settings.
-- `scripts/import_workbook.py`, `scripts/import_all.py`, `scripts/import_additional.py`, `scripts/import_ground_roles.py`: repeatable data imports.
+- `scripts/import_workbook.py`, `scripts/import_all.py`, `scripts/import_additional.py`, `scripts/import_ground_roles.py`, `scripts/import_aircraft_loadouts.py`: repeatable data imports.
 - `tests/filters.test.js`: semantic checks.
 
 © 2025 Kevin Shokrollahi – All Rights Reserved

@@ -3,11 +3,11 @@ import { mkdir, copyFile, cp, readFile, writeFile, rm, readdir } from 'node:fs/p
 // Datasets are served as separate files and fetched on demand, so a visitor
 // downloads only the directories they open. Inlining them into app.js meant a
 // 25 MB bundle that had to be parsed on the main thread before first paint.
-const datasets = ['weapons.json','aircraft.json','ground.json','ground_roles.json','infantry.json','armour.json','sensors.json'];
+const datasets = ['weapons.json','aircraft.json','aircraft_loadouts.json','ground.json','ground_roles.json','infantry.json','armour.json','sensors.json'];
 
 await rm('dist',{recursive:true,force:true});
 await mkdir('dist');
-for(const file of ['index.html','brief.html','styles.css','search.js','app.js','brief.js'])await copyFile(file,`dist/${file}`);
+for(const file of ['index.html','styles.css','search.js','recommendation.js','app.js'])await copyFile(file,`dist/${file}`);
 await mkdir('dist/data',{recursive:true});
 await cp('data/armour_plates','dist/data/armour_plates',{recursive:true});
 
