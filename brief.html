@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brief | Iran Squadron Database</title>
+<meta name="description" content="One screen per vehicle: what to load, where they shoot you, and what the data cannot tell you.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">◈</span>ORDNANCE<span class="brand-sub"><span class="iran-lockup"><span class="iran-name">IRAN SQUADRON</span><span class="warriors-name">DATABASE</span></span></span></a>
+  <div class="top-actions">
+    <a class="soft-button" href="/index.html">Full directory</a>
+    <button id="themeButton" class="icon-button" aria-label="Switch to light mode">☀</button>
+  </div>
+</header>
+
+<div class="brief-shell">
+  <div class="brief-search">
+    <p class="eyebrow">BRIEF</p>
+    <h1 id="briefHeadline">What do I take, and where do they shoot me?</h1>
+    <p class="brief-lede">One screen per vehicle. Pick one.</p>
+    <label for="pickerInput">Vehicle or aircraft
+      <input id="pickerInput" type="search" list="pickerList" placeholder="T-80BVM, Tiger H1, Bf 109 F-4…" autocomplete="off">
+    </label>
+    <datalist id="pickerList"></datalist>
+    <div id="pickerSuggestions" class="brief-suggestions"></div>
+  </div>
+
+  <main id="briefBody" class="brief-body" aria-live="polite">
+    <p class="loading-copy">Loading data…</p>
+  </main>
+</div>
+
+<footer>Snapshot 13 SEP 2026 · Game files, not real-world values · © 2025 Kevin Shokrollahi</footer>
+
+<dialog id="noteDialog">
+  <div class="dialog-header"><div><p class="eyebrow" id="noteEyebrow">WHY THIS IS BLANK</p><h2 id="noteTitle">Note</h2></div><button id="closeNote" class="icon-button" aria-label="Close">✕</button></div>
+  <div id="noteBody" class="source-copy" style="padding:25px"></div>
+</dialog>
+
+<script src="brief.js"></script>
+</body>
+</html>
