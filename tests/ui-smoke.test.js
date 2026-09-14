@@ -22,7 +22,7 @@ class MockElement {
 function loadJson(name){return JSON.parse(fs.readFileSync(new URL(`../data/${name}`,import.meta.url),'utf8'));}
 
 function createContext(){
-  const ids=['searchInput','nationFilter','secondaryFilter','categoryFilter','typeFilter','modeFilter','minBr','maxBr','fieldFilter','operatorFilter','valueFilter','valueLabel','sortFilter','stats','quickFilters','activeFilters','tableHead','tableBody','armourLegend','emptyState','resultCount','pageStatus','previousPage','nextPage','pageTitle','pageSubtitle','breadcrumb','directoryTitle','filterTitle','dataNote','nationLabel','secondaryLabel','categoryLabel','typeLabel','brFilters','detailTitle','detailEyebrow','detailBody','detailDialog','sourcesBody','sourcesDialog','settingsDialog','settingsButton','sourcesButton','themeButton','mobileFilters','closeDetail','closeSources','closeSettings','cancelSettings','settingsDomain','settingsTheme','settingsMessage','settingsFieldList','fieldCount','resetDirectoryFields','saveSettings','resetButton','emptyReset','armourPlatesContent','armourPlatesLabel','errorState','loadoutFinderButton','loadoutFinderDialog','closeLoadoutFinder','finderDomain','finderSearch','finderNation','finderMode','finderMinBr','finderMaxBr','finderFireLabel','finderFireOnly','finderCount','finderNotice','finderHead','finderBody','exportBackup','importBackup','backupFile','backupMessage'];
+  const ids=['searchInput','nationFilter','secondaryFilter','categoryFilter','typeFilter','modeFilter','minBr','maxBr','fieldFilter','operatorFilter','valueFilter','valueLabel','sortFilter','stats','quickFilters','activeFilters','tableHead','tableBody','armourLegend','emptyState','resultCount','pageStatus','previousPage','nextPage','pageTitle','pageSubtitle','breadcrumb','directoryTitle','filterTitle','dataNote','nationLabel','secondaryLabel','categoryLabel','typeLabel','brFilters','detailTitle','detailEyebrow','detailBody','detailDialog','sourcesBody','sourcesDialog','settingsDialog','settingsButton','sourcesButton','themeButton','mobileFilters','closeDetail','closeSources','closeSettings','cancelSettings','settingsDomain','settingsTheme','settingsMessage','settingsFieldList','fieldCount','resetDirectoryFields','saveSettings','resetButton','emptyReset','armourPlatesContent','armourPlatesLabel','errorState','loadoutFinderButton','loadoutFinderDialog','closeLoadoutFinder','finderDomain','finderSearch','finderNation','finderMode','finderMinBr','finderMaxBr','finderFireLabel','finderFireOnly','finderCount','finderNotice','finderHead','finderBody','exportBackup','importBackup','backupFile','backupMessage','finderRoleLabel','finderRole','finderFoxLabel','finderFox','finderMinQuantity','finderViewLabel','finderView','finderStockLabel','finderStockOnly','finderPenLabel','finderMinPen','finderExportJson','finderExportCsv','homeNav','sideFinder','sideSettings','homeAircraft','homeGround','homeEquipment','homeSearchForm','homeSearch','homeView','workspaceView','finderTitle','finderEyebrow','finderHelp'];
   const elements=Object.fromEntries(ids.map(id=>[id,new MockElement(id)]));
   elements.modeFilter.value='BR Realistic';
   elements.operatorFilter.value='contains';
@@ -45,6 +45,21 @@ function createContext(){
 }
 
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
+
+test('Search-first home keeps every directory accessible',async()=>{
+  const {context,elements}=createContext();
+  vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),context);
+  vm.runInContext(fs.readFileSync(new URL('../recommendation.js',import.meta.url),'utf8'),context);
+  vm.runInContext(fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
+  await settle();await settle();
+  assert.equal(elements.homeView.hidden,false);
+  assert.equal(elements.workspaceView.hidden,true);
+  await elements.homeEquipment.onclick();
+  assert.equal(elements.homeView.hidden,true);
+  assert.equal(elements.workspaceView.hidden,false);
+  elements.homeNav.onclick();
+  assert.equal(elements.homeView.hidden,false);
+});
 
 test('Only the datasets a directory needs are fetched',async()=>{
   const {context,elements,nav,domainButtons,fetched}=createContext();
@@ -135,14 +150,22 @@ test('Loadout Finder lazy-loads aircraft presets and supports ground recommendat
   assert.equal(elements.loadoutFinderDialog.open,true);
   assert.ok(fetched.includes('data/aircraft_loadouts.json'));
   const finderState=vm.runInContext("JSON.stringify({loading:finderLoading,loaded:!!database.aircraftLoadouts,rows:finderRows.length})",context);
-  assert.match(elements.finderHead.innerHTML,/Maximum quantity/,`${elements.finderNotice.textContent} ${finderState}`);
+  assert.match(elements.finderHead.innerHTML,/Quantity/,`${elements.finderNotice.textContent} ${finderState}`);
   assert.match(elements.finderHead.innerHTML,/Best preset/i);
   assert.match(elements.finderBody.innerHTML,/incendiary bomb/i);
   assert.ok(Number.parseInt(elements.finderCount.textContent)>300);
+  elements.finderFireOnly.checked=false;
+  elements.finderSearch.value='ARH';
+  elements.finderSearch.listeners.input();
+  assert.match(elements.finderBody.innerHTML,/Fox 3/);
+  elements.finderSearch.value='AIM-120 + AIM-9';
+  elements.finderSearch.listeners.input();
+  assert.ok(Number.parseInt(elements.finderCount.textContent)>0,'combined search must find same-preset matches');
+  assert.match(elements.finderNotice.textContent,/all \+ separated requests/);
   elements.finderDomain.value='ground';
   await elements.finderDomain.onchange();
   assert.ok(fetched.includes('data/ground.json'));
-  assert.match(elements.finderHead.innerHTML,/Maximum vehicle capacity/);
-  assert.match(elements.finderHead.innerHTML,/Recommended quantity/);
+  assert.match(elements.finderHead.innerHTML,/Maximum capacity/);
+  assert.match(elements.finderHead.innerHTML,/Recommended/);
   assert.match(elements.finderBody.innerHTML,/data-ground-override/);
 });

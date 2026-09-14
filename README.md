@@ -1,6 +1,6 @@
-# Ordnance — Iran Squadron database v2.4.0
+# Ordnance — Iran Squadron database v3.0.0
 
-A responsive air, ground and infantry dashboard built from the supplied War Thunder data workbooks. Version 2.4.0 is based on the v2.3.0 lazy-load release and adds an aircraft/ground Loadout Finder, conservative ground-ammunition recommendations, editable tested quantities and JSON backup/restore.
+A responsive air, ground and infantry dashboard built from the supplied War Thunder data workbooks. Version 3.0.0 introduces a search-first workspace, persistent side navigation, redesigned aircraft and ground entry points, aircraft-centered results, and clearer loadout guidance while retaining every v2.5 directory, filter and dataset.
 
 ## Run on Windows
 
