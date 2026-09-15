@@ -132,3 +132,5 @@ td .pen-chip{box-shadow:none;background:transparent;padding:0}
   .pen-chip{flex-wrap:wrap}
   .brief-foldout .table-scroll{overflow-x:auto}
 }
+
+.brand-mark{overflow:hidden;padding:3px}.brand-mark img{display:block;width:100%;height:100%;object-fit:contain}

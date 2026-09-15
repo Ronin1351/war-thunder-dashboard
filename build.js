@@ -7,7 +7,7 @@ const datasets = ['weapons.json','aircraft.json','ground.json','ground_roles.jso
 
 await rm('dist',{recursive:true,force:true});
 await mkdir('dist');
-for(const file of ['index.html','brief.html','styles.css','search.js','app.js','brief.js'])await copyFile(file,`dist/${file}`);
+for(const file of ['index.html','brief.html','styles.css','search.js','app.js','brief.js','ordnance-app-icon.png','favicon.png'])await copyFile(file,`dist/${file}`);
 await mkdir('dist/data',{recursive:true});
 await cp('data/armour_plates','dist/data/armour_plates',{recursive:true});
 
