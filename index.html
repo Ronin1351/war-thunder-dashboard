@@ -17,6 +17,7 @@
     <aside id="filterPanel">
       <div class="aside-title"><div><span class="eyebrow">REFINE</span><h2 id="filterTitle">Air filters</h2></div><button id="resetButton" class="text-button">Reset</button></div>
       <label>Search<input id="searchInput" type="search" placeholder="Name, ID, aircraft…"></label>
+      <label>Marked<select id="markFilter"><option value="">All records</option><option value="favorite">♥ Favorites</option><option value="special">★ Special</option><option value="either">♥ or ★</option><option value="both">♥ and ★</option><option value="none">Unmarked</option></select></label>
       <label id="nationLabel">Origin<select id="nationFilter"><option value="">All origins</option></select></label>
       <label id="secondaryLabel">Carrier country<select id="secondaryFilter"><option value="">All countries</option></select></label>
       <label id="categoryLabel">Category<select id="categoryFilter"><option value="">All categories</option></select></label>
@@ -34,5 +35,5 @@
   <dialog id="detailDialog"><div class="dialog-header"><div><p id="detailEyebrow" class="eyebrow"></p><h2 id="detailTitle"></h2></div><button id="closeDetail" class="icon-button" aria-label="Close">✕</button></div><div id="detailBody"></div></dialog>
   <dialog id="sourcesDialog"><div class="dialog-header"><h2>Dataset & sources</h2><button id="closeSources" class="icon-button" aria-label="Close">✕</button></div><div id="sourcesBody"></div></dialog>
   <dialog id="settingsDialog"><div class="dialog-header"><div><p class="eyebrow">PREFERENCES</p><h2>Settings</h2></div><button id="closeSettings" class="icon-button" aria-label="Close">✕</button></div><div id="settingsBody"><section class="settings-section"><h3>Appearance</h3><label>Theme<select id="settingsTheme"><option value="dark">Dark</option><option value="light">Light</option></select></label></section><section class="settings-section"><div class="settings-heading"><div><h3>Directory information</h3><p>Select and order up to 10 fields. The name field remains required.</p></div><strong id="fieldCount">0 / 10</strong></div><label>Directory<select id="settingsDomain"><option value="air">Air and guided weapons</option><option value="aircraft">Aircraft</option><option value="ground">Ground forces</option><option value="infantry">Infantry</option></select></label><div id="settingsFieldList" class="settings-field-list"></div><p id="settingsMessage" class="settings-message" role="status"></p></section><div class="settings-actions"><button id="resetDirectoryFields" class="soft-button">Restore defaults</button><div><button id="cancelSettings" class="soft-button">Cancel</button><button id="saveSettings" class="primary-button">Save settings</button></div></div></div></dialog>
-  <script src="search.js"></script><script src="app.js"></script>
+  <script src="search.js"></script><script src="marks.js"></script><script src="app.js"></script>
 </body></html>
