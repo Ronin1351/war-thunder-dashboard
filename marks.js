@@ -60,5 +60,13 @@
     return counts;
   }
 
-  root.OrdnanceMarks = {KINDS, FILTERS, STORAGE_KEY, empty, markKey, parseMarks, serializeMarks, hasMark, toggleMark, passMarkFilter, countMarks};
+  // Sort rank for "marked first". The chosen mark outranks the other one:
+  // favorite-first gives both=3, favorite=2, special=1, none=0.
+  function markRank(marks, key, primary){
+    if (!KINDS.includes(primary)) return 0;
+    const other = primary === 'favorite' ? 'special' : 'favorite';
+    return (marks[primary].has(key) ? 2 : 0) + (marks[other].has(key) ? 1 : 0);
+  }
+
+  root.OrdnanceMarks = {KINDS, FILTERS, STORAGE_KEY, empty, markKey, parseMarks, serializeMarks, hasMark, toggleMark, passMarkFilter, countMarks, markRank};
 })(globalThis);
