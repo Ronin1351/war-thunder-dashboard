@@ -178,3 +178,25 @@ test('Marks are scoped per directory and survive a reload',async()=>{
   await settle();await settle();
   assert.equal(Number(elements.resultCount.textContent),1,'mark filter persists across directories and finds the saved aircraft');
 });
+
+test('Marked-first sorts put marked records at the top without hiding the rest',async()=>{
+  const {context,elements,nav,domainButtons,loadJson}=createContext();
+  vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),context);
+  vm.runInContext(fs.readFileSync(new URL('../marks.js',import.meta.url),'utf8'),context);
+  vm.runInContext(fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
+  await settle();await settle();
+  const groundButton=domainButtons.find(button=>button.dataset.domain==='ground');
+  nav.onclick({target:{closest:()=>groundButton}});
+  await settle();await settle();
+  assert.match(elements.sortFilter.innerHTML,/Favorites first/);
+  assert.match(elements.sortFilter.innerHTML,/Special first/);
+  const vehicles=loadJson('ground.json').vehicles,last=vehicles.at(-1)['Vehicle ID'],prev=vehicles.at(-2)['Vehicle ID'];
+  const click=(kind,id)=>{const target={dataset:{mark:kind,markId:id}};elements.tableBody.onclick({target:{closest:sel=>sel==='[data-mark]'?target:null}});};
+  click('special',last);click('favorite',prev);
+  const firstIds=()=>[...elements.tableBody.innerHTML.matchAll(/class="record-button" data-id="([^"]+)"/g)].map(m=>m[1]).slice(0,2);
+  elements.sortFilter.value='mark:favorite|desc';elements.sortFilter.listeners.change();
+  assert.deepEqual(firstIds(),[prev,last]);
+  assert.equal(Number(elements.resultCount.textContent),vehicles.length,'sorting must not filter');
+  elements.sortFilter.value='mark:special|desc';elements.sortFilter.listeners.change();
+  assert.deepEqual(firstIds(),[last,prev]);
+});

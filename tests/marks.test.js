@@ -43,6 +43,16 @@ test('Filter truth table',()=>{
   assert.deepEqual(M.countMarks(m, ['g:n']), {favorite:0, special:0, either:0, both:0}, 'counts only keys present in the dataset');
 });
 
+test('markRank orders the chosen mark first, then the other mark',()=>{
+  let m = M.empty();
+  m = M.toggleMark(m,'favorite','g:f'); m = M.toggleMark(m,'special','g:s');
+  m = M.toggleMark(M.toggleMark(m,'favorite','g:b'),'special','g:b');
+  const order = kind => ['g:n','g:s','g:f','g:b'].sort((a,b)=>M.markRank(m,b,kind)-M.markRank(m,a,kind));
+  assert.deepEqual(order('favorite'), ['g:b','g:f','g:s','g:n']);
+  assert.deepEqual(order('special'), ['g:b','g:s','g:f','g:n']);
+  assert.equal(M.markRank(m,'g:b','bogus'), 0, 'unknown kind ranks nothing');
+});
+
 test('Same ID in two directories stays separate',()=>{
   const m = M.toggleMark(M.empty(),'favorite',M.markKey('aircraft','x'));
   assert.ok(!M.hasMark(m,'favorite',M.markKey('ground','x')));

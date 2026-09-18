@@ -293,9 +293,13 @@ function show(entry){
 }
 
 function suggest(query){
-  const phrase = query.trim().toLowerCase();
-  if(!phrase){$('pickerSuggestions').innerHTML='';return;}
-  const hits = entries.filter(entry=>entry.label.toLowerCase().includes(phrase)||entry.id.toLowerCase().includes(phrase)).slice(0,8);
+  if(!query.trim()){$('pickerSuggestions').innerHTML='';return;}
+  // search.js makes this separator-blind ('a7e' finds 'A-7E'); plain substring if it failed to load.
+  const score = globalThis.OrdnanceSearch
+    ? entry=>globalThis.OrdnanceSearch.matchScore([entry.label,entry.id],query)
+    : entry=>(entry.label.toLowerCase().includes(query.trim().toLowerCase())||entry.id.toLowerCase().includes(query.trim().toLowerCase()))?0:-1;
+  const hits = entries.map(entry=>[entry,score(entry)]).filter(([,value])=>value>=0)
+    .sort((a,b)=>b[1]-a[1]||a[0].label.localeCompare(b[0].label,undefined,{numeric:true})).slice(0,8).map(([entry])=>entry);
   $('pickerSuggestions').innerHTML = hits.map(entry=>
     `<button data-pick="${esc(entry.id)}" data-kind="${esc(entry.kind)}">
        <span class="pick-name">${flag(entry.nation)}<strong>${esc(entry.label)}</strong></span>

@@ -42,6 +42,7 @@ function createContext(){
 
 async function boot(){
   const created=createContext();
+  vm.runInContext(fs.readFileSync(new URL('../search.js',import.meta.url),'utf8'),created.context);
   vm.runInContext(fs.readFileSync(new URL('../brief.js',import.meta.url),'utf8'),created.context);
   for(let i=0;i<6;i++)await settle();
   return created;
