@@ -50,18 +50,19 @@ snapshot 2026-09-13. Game values, not real-world values.
 
 `lists.html` holds named vehicle lists, an owned flag per vehicle, and a ranking by how many lists each vehicle is in.
 
-Every change is saved to the browser first, then to a private Vercel Blob store through `/api/lists` about 2 seconds later. The cloud copy is what protects the lists; the browser copy only covers being offline.
+Every change is saved to the browser first, then to the private `Ordnance Lists` table through an Appwrite Function about 2 seconds later. The cloud copy protects the lists; the browser copy also keeps the page usable while offline.
 
-One-time setup in Vercel:
+One-time setup in Appwrite:
 
-1. Storage → Create → Blob → access **Private** (cannot be changed later) → connect it to this project.
-2. Project → Settings → Environment Variables → add `LISTS_PASSPHRASE` (20+ characters) for Production and Preview.
-3. Redeploy. Open `/lists.html`, enter the passphrase once per device.
+1. Create the `Ordnance Lists` table in database `map_guide` with required `payload` (text) and `revision` (integer) columns.
+2. Deploy `appwrite/functions/ordnance-lists` as a Node.js Function and grant only row read/write scopes.
+3. Add the Function variable `LISTS_PASSPHRASE` (20+ characters). This build uses `https://ordnance-lists-sync.sgp.appwrite.run` in the `lists-api` meta tag in `lists.html`.
+4. Open `/lists.html` and enter the passphrase once per device.
 
 Protection:
 
 - Two devices editing at once are merged; a stale save is rejected and merged, never overwritten.
-- The first save of each day keeps the previous day's final state in `lists/daily/`. **Backups** on the page adds a day's lists back in without removing anything current.
+- The first save of each day keeps the previous day's final state as chunked backup rows. **Backups** on the page adds a day's lists back in without removing anything current.
 - **Export file** downloads a JSON copy; **Import file** adds one back in.
 
-Limits (Hobby plan): 2,000 Blob writes a month. Saves are batched, so normal use stays far below that. If the limit is ever hit, Vercel locks Blob for 30 days; lists keep working on each device, and Export still works.
+Large documents are split into rows below Appwrite's text-column limit. Saves are batched; if Appwrite is unavailable, lists remain on the current device and Export still works.

@@ -1,5 +1,5 @@
 // Lists page: saved lists, owned flags, ranking, and cloud sync.
-// Every change is written to this device first, then to the cloud (/api/lists).
+// Every change is written to this device first, then to the configured Appwrite Function.
 const L = globalThis.OrdnanceLists;
 const S = globalThis.OrdnanceSearch;
 const $ = id => document.getElementById(id);
@@ -11,6 +11,7 @@ const fmtBr = value => typeof value === 'number' ? value.toFixed(1) : '—';
 
 const LOCAL_KEY = 'ordnance-lists-v1', PASS_KEY = 'ordnance-lists-key';
 const SAVE_DELAY = 2000, RETRY_DELAY = 30000;
+const LISTS_API = document.querySelector('meta[name="lists-api"]')?.content.trim() || '/api/lists';
 
 // ---------------------------------------------------------------- state
 const storage = {
@@ -50,7 +51,9 @@ function commit(next){
 // ----------------------------------------------------------------- cloud
 async function api(method, {query = '', body, keepalive = false} = {}){
   try {
-    const response = await fetch(`/api/lists${query}`, {method, keepalive, headers: {'Content-Type':'application/json', 'X-Lists-Key': passKey || ''}, body: body === undefined ? undefined : JSON.stringify(body)});
+    const separator = LISTS_API.includes('?') ? '&' : '?';
+    const url = query ? `${LISTS_API}${separator}${query.replace(/^\?/, '')}` : LISTS_API;
+    const response = await fetch(url, {method, keepalive, headers: {'Content-Type':'application/json', 'X-Lists-Key': passKey || ''}, body: body === undefined ? undefined : JSON.stringify(body)});
     let data = null; try { data = await response.json(); } catch {}
     return {status: response.status, data: data || {}};
   } catch { return {status: 0, data: {}}; }
