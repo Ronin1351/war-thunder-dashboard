@@ -30,6 +30,7 @@ let passKey = storage.get(PASS_KEY);
 let sync = {status: passKey ? 'saving' : 'local', savedAt: null, message: ''};
 let catalog = new Map(), catalogRows = [];
 let openAdd = null, addQuery = '';
+const expandedLists = new Set();
 let rankOwned = 'all', rankDomain = 'all';
 let saveTimer = null, retryTimer = null, inFlight = false;
 
@@ -181,14 +182,14 @@ function renderLists(){
   const {lists} = state.doc;
   $('listCount').textContent = lists.length;
   if (!lists.length) { $('listsBody').innerHTML = '<div class="lists-empty"><p>No lists yet.</p><p class="muted">Create one above, then add vehicles to it.</p></div>'; return; }
-  $('listsBody').innerHTML = lists.map(list => `<section class="list-card" data-list-id="${esc(list.id)}">
-    <header><h3>${esc(list.name)} <span class="count-pill">${list.items.length}</span></h3>
+  $('listsBody').innerHTML = lists.map(list => { const expanded = expandedLists.has(list.id); return `<section class="list-card${expanded ? ' expanded' : ' collapsed'}" data-list-id="${esc(list.id)}">
+    <header><button class="list-toggle" data-action="toggle-list" data-list="${esc(list.id)}" aria-expanded="${expanded}" aria-controls="list-content-${esc(list.id)}"><span class="list-chevron" aria-hidden="true">›</span><span>${esc(list.name)}</span> <span class="count-pill">${list.items.length}</span></button>
       <div class="list-actions"><button class="lists-btn" data-action="rename" data-list="${esc(list.id)}">Rename</button><button class="lists-btn danger" data-action="delete" data-list="${esc(list.id)}">Delete</button></div></header>
-    <div class="list-items">${list.items.length ? list.items.map(key => vehicleCard(key, {aside: `<button class="remove-item" data-action="remove" data-list="${esc(list.id)}" data-key="${esc(key)}" aria-label="Remove ${esc(nameOf(key))} from ${esc(list.name)}">✕</button>`})).join('') : '<p class="muted small">Empty. Add your first vehicle.</p>'}</div>
+    <div class="list-content" id="list-content-${esc(list.id)}" ${expanded ? '' : 'hidden'}><div class="list-items">${list.items.length ? list.items.map(key => vehicleCard(key, {aside: `<button class="remove-item" data-action="remove" data-list="${esc(list.id)}" data-key="${esc(key)}" aria-label="Remove ${esc(nameOf(key))} from ${esc(list.name)}">✕</button>`})).join('') : '<p class="muted small">Empty. Add your first vehicle.</p>'}</div>
     ${openAdd === list.id
       ? `<div class="add-panel"><div class="add-row"><input class="add-input" data-list="${esc(list.id)}" type="search" autocomplete="off" placeholder="Search all aircraft and ground vehicles" value="${esc(addQuery)}" aria-label="Search vehicles to add to ${esc(list.name)}"><button class="lists-btn" data-action="close-add">Done</button></div><div class="add-results">${catalogRows.length ? searchResults(list) : '<p class="muted small">Loading vehicles…</p>'}</div></div>`
       : `<button class="lists-btn add-button" data-action="open-add" data-list="${esc(list.id)}">+ Add vehicle</button>`}
-  </section>`).join('');
+    </div></section>`; }).join('');
 }
 
 function renderRanking(){
@@ -235,8 +236,18 @@ $('newListForm').addEventListener('submit', event => {
   event.preventDefault();
   const name = $('newListName').value.trim();
   if (!name) return $('newListName').focus();
+  const existing = L.findListByName(state.doc, name);
+  if (existing) {
+    expandedLists.add(existing.id);
+    openAdd = null; addQuery = '';
+    $('newListName').value = '';
+    renderLists();
+    document.querySelector(`[data-list-id="${CSS.escape(existing.id)}"]`)?.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
   if (state.doc.lists.length >= L.LIMITS.lists) return alert(`You can keep up to ${L.LIMITS.lists} lists.`);
   const id = newId();
+  expandedLists.add(id);
   openAdd = id; addQuery = '';
   $('newListName').value = '';
   commit(L.createList(state.doc, id, name));
@@ -251,12 +262,13 @@ document.addEventListener('click', async event => {
   const {action, list: listId, key} = target.dataset;
   const list = state.doc.lists.find(item => item.id === listId);
   if (action === 'own') return commit(L.toggleOwned(state.doc, key));
-  if (action === 'open-add') { openAdd = listId; addQuery = ''; renderLists(); return focusAddInput(); }
+  if (action === 'toggle-list' && list) { expandedLists.has(listId) ? expandedLists.delete(listId) : expandedLists.add(listId); if (!expandedLists.has(listId) && openAdd === listId) { openAdd = null; addQuery = ''; } return renderLists(); }
+  if (action === 'open-add') { expandedLists.add(listId); openAdd = listId; addQuery = ''; renderLists(); return focusAddInput(); }
   if (action === 'close-add') { openAdd = null; addQuery = ''; return renderLists(); }
   if (action === 'add') { commit(L.addItem(state.doc, listId, key)); return focusAddInput(); }
   if (action === 'remove') return commit(L.removeItem(state.doc, listId, key));
-  if (action === 'rename' && list) { const name = prompt('Rename list', list.name); if (name !== null && name.trim()) commit(L.renameList(state.doc, listId, name)); return; }
-  if (action === 'delete' && list) { if (confirm(`Delete "${list.name}" and its ${list.items.length} vehicle(s)?`)) { if (openAdd === listId) openAdd = null; commit(L.deleteList(state.doc, listId)); } return; }
+  if (action === 'rename' && list) { const name = prompt('Rename list', list.name); if (name !== null && name.trim()) { const existing = L.findListByName(state.doc, name); if (existing && existing.id !== listId) { expandedLists.add(existing.id); renderLists(); document.querySelector(`[data-list-id="${CSS.escape(existing.id)}"]`)?.scrollIntoView({behavior:'smooth', block:'center'}); return alert(`A list named "${existing.name}" already exists. That list has been opened.`); } commit(L.renameList(state.doc, listId, name)); } return; }
+  if (action === 'delete' && list) { if (confirm(`Delete "${list.name}" and its ${list.items.length} vehicle(s)?`)) { expandedLists.delete(listId); if (openAdd === listId) openAdd = null; commit(L.deleteList(state.doc, listId)); } return; }
   if (action === 'sync-now') return state.dirty ? saveNow() : pull();
   if (action === 'export') return download();
   if (action === 'import') return $('importFile').click();

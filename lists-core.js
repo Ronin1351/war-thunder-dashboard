@@ -8,17 +8,21 @@
   const isKey = key => typeof key === 'string' && KEY_PATTERN.test(key);
   const unique = values => [...new Set(values)];
   const cleanName = name => String(name ?? '').replace(/\s+/g,' ').trim().slice(0, LIMITS.name) || 'Untitled list';
+  const nameKey = name => cleanName(name).toLocaleLowerCase();
 
   // Accepts anything. Returns a valid document. Never throws.
   function normalizeDoc(raw){
     let data = raw;
     if (typeof raw === 'string') { try { data = JSON.parse(raw); } catch { return emptyDoc(); } }
     if (!data || typeof data !== 'object') return emptyDoc();
-    const seen = new Set(), lists = [];
+    const seen = new Set(), byName = new Map(), lists = [];
     for (const list of Array.isArray(data.lists) ? data.lists : []) {
       if (!list || typeof list.id !== 'string' || !list.id || list.id.length > 64 || seen.has(list.id)) continue;
       seen.add(list.id);
-      lists.push({id:list.id, name:cleanName(list.name), items:unique((Array.isArray(list.items) ? list.items : []).filter(isKey)).slice(0, LIMITS.items)});
+      const normalized = {id:list.id, name:cleanName(list.name), items:unique((Array.isArray(list.items) ? list.items : []).filter(isKey)).slice(0, LIMITS.items)};
+      const existing = byName.get(nameKey(normalized.name));
+      if (existing) existing.items = unique([...existing.items, ...normalized.items]).slice(0, LIMITS.items);
+      else { byName.set(nameKey(normalized.name), normalized); lists.push(normalized); }
       if (lists.length === LIMITS.lists) break;
     }
     const owned = unique((Array.isArray(data.owned) ? data.owned : []).filter(isKey));
@@ -26,12 +30,14 @@
   }
 
   const mapList = (doc, id, change) => ({...doc, lists: doc.lists.map(list => list.id === id ? change(list) : list)});
+  const findListByName = (doc, name) => doc.lists.find(list => nameKey(list.name) === nameKey(name));
 
   function createList(doc, id, name){
-    if (doc.lists.length >= LIMITS.lists || doc.lists.some(list => list.id === id)) return doc;
+    if (doc.lists.length >= LIMITS.lists || doc.lists.some(list => list.id === id) || findListByName(doc, name)) return doc;
     return {...doc, lists:[...doc.lists, {id, name:cleanName(name), items:[]}]};
   }
-  const renameList = (doc, id, name) => mapList(doc, id, list => ({...list, name:cleanName(name)}));
+  const renameList = (doc, id, name) => findListByName(doc, name)?.id !== id && findListByName(doc, name)
+    ? doc : mapList(doc, id, list => ({...list, name:cleanName(name)}));
   const deleteList = (doc, id) => ({...doc, lists: doc.lists.filter(list => list.id !== id)});
   const addItem = (doc, id, key) => !isKey(key) ? doc : mapList(doc, id, list =>
     list.items.includes(key) || list.items.length >= LIMITS.items ? list : {...list, items:[...list.items, key]});
@@ -84,5 +90,5 @@
   // Content equality, ignoring savedAt.
   const sameDoc = (a, b) => JSON.stringify({l:a.lists, o:a.owned}) === JSON.stringify({l:b.lists, o:b.owned});
 
-  root.OrdnanceLists = {LIMITS, emptyDoc, isKey, normalizeDoc, createList, renameList, deleteList, addItem, removeItem, isOwned, toggleOwned, rankVehicles, mergeSet, mergeDocs, sameDoc};
+  root.OrdnanceLists = {LIMITS, emptyDoc, isKey, normalizeDoc, findListByName, createList, renameList, deleteList, addItem, removeItem, isOwned, toggleOwned, rankVehicles, mergeSet, mergeDocs, sameDoc};
 })(globalThis);

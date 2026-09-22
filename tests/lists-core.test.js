@@ -31,6 +31,24 @@ test('Edits are immutable and idempotent',()=>{
   assert.equal(L.createList(two, 'l1', 'dup'), two, 'duplicate list id refused');
 });
 
+test('List names are unique regardless of case or repeated spaces',()=>{
+  let doc = L.createList(L.emptyDoc(), 'l1', '  ABC  ');
+  assert.equal(L.findListByName(doc, 'abc').id, 'l1');
+  assert.equal(L.findListByName(doc, ' A B C '), undefined);
+  assert.equal(L.createList(doc, 'l2', 'abc'), doc, 'duplicate name opens the existing list in the UI instead of creating one');
+  doc = L.createList(doc, 'l2', 'Second list');
+  assert.equal(L.renameList(doc, 'l2', 'AbC'), doc, 'rename cannot create a duplicate name');
+});
+
+test('Import merges legacy duplicate names without losing vehicles',()=>{
+  const doc = L.normalizeDoc({lists:[
+    {id:'one', name:'CAS', items:[A,B]},
+    {id:'two', name:'  cas ', items:[B,C]}
+  ]});
+  assert.equal(doc.lists.length, 1);
+  assert.deepEqual(doc.lists[0], {id:'one', name:'CAS', items:[A,B,C]});
+});
+
 test('Ranking: most lists first, then not-owned, then name',()=>{
   let doc = build(['l1','One',[A,B,C]], ['l2','Two',[B,C]], ['l3','Three',[B,D]]);
   doc = L.toggleOwned(doc, C);

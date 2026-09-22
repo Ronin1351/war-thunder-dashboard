@@ -130,7 +130,7 @@ test('The link between the directory and the Brief survives on a phone',()=>{
 
   // Both navigation links must carry the class that is exempt from the
   // mobile hide rule, otherwise the Brief is unreachable on any phone.
-  assert.match(index,/class="soft-button brief-button"[^>]*href="\/"/, 'directory must link to the Brief with brief-button');
+  assert.match(index,/class="soft-button brief-button"[^>]*href="\.\/brief\.html"/, 'directory must link to the Brief with brief-button');
   assert.match(brief,/class="soft-button brief-button"/, 'Brief must link back with brief-button');
 
   // Every rule that hides .soft-button below 720px must exempt it.

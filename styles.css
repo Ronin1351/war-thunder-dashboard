@@ -166,6 +166,13 @@ td .pen-chip{box-shadow:none;background:transparent;padding:0}
 .list-card{padding:14px;border-radius:16px;background:var(--bg);box-shadow:inset 3px 3px 8px var(--inset-dark),inset -3px -3px 8px var(--inset-light);display:grid;gap:10px;margin-bottom:14px}
 .list-card header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .list-card h3{margin:0;font-size:1rem}
+.list-toggle{appearance:none;border:0;background:transparent;color:var(--text);font:inherit;font-size:1rem;font-weight:750;display:flex;align-items:center;gap:8px;padding:5px 3px;cursor:pointer;text-align:left}
+.list-toggle:hover{color:var(--accent)}
+.list-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:8px}
+.list-chevron{font-size:1.5rem;line-height:.75;display:inline-block;transform:rotate(0deg);transition:transform .18s ease}
+.list-toggle[aria-expanded="true"] .list-chevron{transform:rotate(90deg)}
+.list-content{display:grid;gap:10px}
+.list-card.collapsed{gap:0}
 .list-actions{display:flex;gap:6px}
 .list-items{display:grid;gap:8px}
 .add-button{justify-self:start}
